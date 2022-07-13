@@ -1,6 +1,8 @@
 #ifndef PORT_TYPES_H
 #define PORT_TYPES_H
 
+#include "Std_Types.h"
+
 /*
 Port_PinType
 Port_PinDirectionType
@@ -84,7 +86,9 @@ typedef enum
     I2C_SCL,
     TIMER,
     PWM,
-    ADC
+    ADC,
+    JTAG,
+    SWD
 }Port_PinModeType;
 
 typedef enum
@@ -113,18 +117,18 @@ typedef enum
 
 typedef struct 
 {
-    Port_PinModeType             mode;           //{Uart , GPIO, ....}
-    Port_PinDirectionType        direction;      //If GPIO : input/output
-    PortPinLevelValueType        level;          //if output ---> HIGH,LOW
-    Port_PinInternalAttachType   connection;     //PullUp/Down/OpenDrain
-    Port_PinOutputCurrentType    driveStrength;     //2mA, 4mA, 8mA
+    Port_PinModeType             mode;           /*{Uart , GPIO, ....}*/
+    Port_PinDirectionType        direction;      /*If GPIO : input/output*/
+    PortPinLevelValueType        level;          /*if output ---> HIGH,LOW*/
+    Port_PinInternalAttachType   connection;     /*PullUp/Down/OpenDrain*/
+    Port_PinOutputCurrentType    driveStrength;     /*2mA, 4mA, 8mA*/
 }Pin_ConfigType;
 
 
 typedef struct
 {
     uint8 numberPins;
-    Pin_ConfigType astrPins[8];            //Array of 8 pins 
+    Pin_ConfigType astrPins[8];            /*Array of 8 pins */
 }Port_ConfigType;
 
 

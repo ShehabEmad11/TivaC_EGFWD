@@ -9,7 +9,7 @@ typedef signed short int sint16;
 typedef signed long int sint32;
 
 
-typedef enum 
+typedef enum
 {
     STD_LOW=0,
     STD_HIGH=1

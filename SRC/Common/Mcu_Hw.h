@@ -81,8 +81,8 @@ typedef union
 
 /*************************GPIO**********************************/
 #define GPIO_BASE_ADDRESS_AHB       (0x40058000ul)
-//Expand GPIO_astr as casting of GPIOA_AHB's Address as pointer to structure
-#define GPIO_P2str                  (( volatile GpioRegs_t *) (GPIO_BASE_ADDRES_AHB))
+/*Expand GPIO_astr as casting of GPIOA_AHB's Address as pointer to structure*/
+#define GPIO_P2str                  (( volatile GpioRegs_t *) (GPIO_BASE_ADDRESS_AHB))
 
 typedef struct 
 {

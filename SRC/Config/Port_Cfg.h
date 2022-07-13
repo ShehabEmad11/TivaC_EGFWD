@@ -29,7 +29,7 @@
 /*PINB5*/                         {GPIO        ,OUTPUT       ,STD_LOW      ,CONNECTION_DEFAULT   ,CURRENT_2mA}, \
 /*PINB6*/                         {GPIO        ,OUTPUT       ,STD_LOW      ,CONNECTION_DEFAULT   ,CURRENT_2mA}, \
 /*PINB7*/                         {GPIO        ,OUTPUT       ,STD_LOW      ,CONNECTION_DEFAULT   ,CURRENT_2mA}, \
-                                }},
+                                }
 
                                 /*PinMode     Direction        Level         Connection          DriveStrength*/
 #define PORTC_PINS_CONFIG       {\
@@ -51,7 +51,7 @@
 /*PIND4*/                         {GPIO        ,INPUT       ,STD_LOW         ,PULL_DOWN           ,CURRENT_DEFAULT}, \
 /*PIND5*/                         {GPIO        ,INPUT       ,STD_LOW         ,PULL_DOWN           ,CURRENT_DEFAULT}, \
 /*PIND6*/                         {GPIO        ,INPUT       ,STD_LOW         ,PULL_DOWN           ,CURRENT_DEFAULT}, \
-/*PIND7*/                         {GPIO        ,INPUT       ,STD_LOW         ,PULL_DOWN           ,CURRENT_DEFAULT}, \
+/*PIND7*//*Locked*/               {GPIO        ,INPUT       ,STD_LOW         ,PULL_DOWN           ,CURRENT_DEFAULT}, \
                                 }
 
                                 /*PinMode     Direction        Level         Connection          DriveStrength*/
@@ -62,20 +62,20 @@
 /*PINE3*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
 /*PINE4*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
 /*PINE5*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
-/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, \
-/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, \*/
+/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, */\
+/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, */\
                                 }
 
                                 /*PinMode     Direction        Level         Connection          DriveStrength*/
 #define PORTF_PINS_CONFIG       {\
-/*PINF0*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
-/*PINF1*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
-/*PINF2*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
-/*PINF3*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
-/*PINF4*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
-/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, \
-/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, \
-/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, \*/
+/*PINF0*//*Locked*/               {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
+/*PINF1*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
+/*PINF2*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
+/*PINF3*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
+/*PINF4*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
+/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, */\
+/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, */\
+/*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, */\
                                 }
 
 

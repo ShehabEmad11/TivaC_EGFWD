@@ -34,11 +34,11 @@ extern void Dio_WriteChannel (Dio_ChannelType ChannelId , Dio_LevelType Level)
     /*Get PIN offset inside PORT register*/
     pinOffset= ChannelId % 8;
 
-    addressOffsetVal=((uint16) pinOffset & 0x00FF )<<2;
+    addressOffsetVal=(uint16) ( (uint16)1 << ((uint16)pinOffset + (uint16)2) ) ;
 
-    writeVal=Level<<pinOffset;
+    writeVal=(uint8)Level<<pinOffset;
 
-    *( (uint8*) ( ((uint8 *)&GPIO_P2str[PortId].GPIODATA) + addressOffsetVal ) ) = writeVal;
+    *( (volatile uint8*) ( ((volatile uint8*)&GPIO_P2str[portId].GPIODATA) + addressOffsetVal ) ) = writeVal;
 }
 
 
@@ -46,9 +46,9 @@ extern void Dio_WritePort (Dio_PortType PortId , Dio_PortLevelType Level)
 {
     uint16 addressOffsetVal;  
 
-    addressOffsetVal= 0x00FF << 2;
+    addressOffsetVal= (uint16)((uint16)0x00FF <<(uint16)2);
 
-   *( (uint8*) ( ((uint8 *)&GPIO_P2str[PortId].GPIODATA) + addressOffsetVal ) ) = Level;
+   *( (volatile uint8*) ( ((volatile uint8*)&GPIO_P2str[PortId].GPIODATA) + addressOffsetVal ) ) = Level;
 }
 
 
@@ -65,10 +65,9 @@ extern Dio_LevelType Dio_ReadChannel (Dio_ChannelType ChannelId)
     /*Get PIN offset inside PORT register*/
     pinOffset= ChannelId % 8;
 
-    addressOffsetVal=((uint16) pinOffset & 0x00FF )<<2;
+    addressOffsetVal=(uint16) ( (uint16)1 << ((uint16)pinOffset + (uint16)2) ) ;
 
-
-    readVal= *( (uint8*) ( ((uint8 *)&GPIO_P2str[PortId].GPIODATA) + addressOffsetVal ) );
+    readVal= *( (volatile uint8*) ( ((volatile uint8*)&GPIO_P2str[portId].GPIODATA) + addressOffsetVal ) );
 
     readVal >>= pinOffset;
 
@@ -80,9 +79,9 @@ extern Dio_PortLevelType Dio_ReadPort (Dio_PortType PortId)
     uint16 addressOffsetVal;  
     Dio_PortLevelType readVal;
 
-    addressOffsetVal= 0x00FF << 2;
+    addressOffsetVal= (uint16) ((uint16)0x00FF << (uint16)2);
 
-    readVal= *( (uint8*) ( ((uint8 *)&GPIO_P2str[PortId].GPIODATA) + addressOffsetVal ) );
+    readVal= *( (volatile uint8*) ( ((volatile uint8*)&GPIO_P2str[PortId].GPIODATA) + addressOffsetVal ) );
 
     return readVal;
     
@@ -95,9 +94,9 @@ Dio_LevelType Dio_FlipChannel (Dio_ChannelType ChannelId)
     uint16 addressOffsetVal;  
     uint8 pinOffset;
     uint8 writeVal;
-    uint8 readVal
+    uint8 readVal;
     
-    Dio_LevelType dummy;
+    Dio_LevelType dummy=0;
 
     /*Get PortId*/
     portId= ChannelId / 8;
@@ -105,14 +104,13 @@ Dio_LevelType Dio_FlipChannel (Dio_ChannelType ChannelId)
     /*Get PIN offset inside PORT register*/
     pinOffset= ChannelId % 8;
 
-    addressOffsetVal=((uint16) pinOffset & 0x00FF )<<2;
+    addressOffsetVal=(uint16) ( (uint16)1 << ((uint16)pinOffset + (uint16)2) ) ;
 
+    readVal= *( (volatile uint8*) ( ((volatile uint8*)&GPIO_P2str[portId].GPIODATA) + addressOffsetVal ) );
 
-    readVal= *( (uint8*) ( ((uint8 *)&GPIO_P2str[PortId].GPIODATA) + addressOffsetVal ) );
+    writeVal=(readVal ^ ((uint8)1<<pinOffset));
 
-    writeVal=(readVal ^ (1<<pinOffset));
-
-    *( (uint8*) ( ((uint8 *)&GPIO_P2str[PortId].GPIODATA) + addressOffsetVal ) ) = writeVal;
+    *( (volatile uint8*) ( ((volatile uint8*)&GPIO_P2str[portId].GPIODATA) + addressOffsetVal ) ) = writeVal;
 
     return dummy;
 }
