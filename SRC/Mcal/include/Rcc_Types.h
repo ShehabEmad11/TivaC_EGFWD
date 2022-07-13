@@ -1,0 +1,16 @@
+#ifndef RCC_TYPES_H
+#define RCC_TYPES_H
+
+
+
+typedef enum 
+{
+    PERIPHIRAL_GPIO_PORTA,
+    PERIPHIRAL_GPIO_PORTB,
+    PERIPHIRAL_GPIO_PORTC,
+    PERIPHIRAL_GPIO_PORTD,
+    PERIPHIRAL_GPIO_PORTE,
+    PERIPHIRAL_GPIO_PORTF
+}Rcc_PeripheralType;
+
+#endif /* RCC_TYPES_H */

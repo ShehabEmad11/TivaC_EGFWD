@@ -22,4 +22,7 @@ typedef enum
 #define E_OK    (0u)
 #define E_NOK   (1u)
 
+#define STD_OFF (0u)
+#define STD_ON  (1u)
+
 #endif /* STD_TYPES_H */
