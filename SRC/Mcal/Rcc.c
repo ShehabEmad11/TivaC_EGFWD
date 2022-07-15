@@ -13,6 +13,33 @@
 #include "Mcu_Hw.h"
 
 
+typedef enum
+{
+    WDG                             =0x00,
+    TIMER_16_32                     =(PERIPH_TIMER_16_32_RUN_TIMER0>>8),
+    GPIO                            =(PERIPH_GPIO_RUN_PA>>8),
+    DMA               				=0x03,				
+	HIBERNATION       				=0x04,
+	UART              				=0x05,				
+	SPI               				=0x06,				
+	I2C               				=0x07,				
+	USB               				=0x08,				
+	CAN               				=0x09,				
+	ADC               				=0x0A,
+	ANALOG_COMPARATOR			    =0x0B,
+	PWM              				=0x0C,		
+	QUADRATURE       				=0x0D,
+	EEPROM           				=0x0E,
+    TIMER_32_64                     =(PERIPH_TIMER_32_64_RUN_TIMER0>>8)
+}Rcc_InternalPeriph_t;
+
+typedef enum
+{
+    RUN_MODE,
+    SLEEP_MODE,
+    DEEPSLEEP_MODE
+}Rcc_InternalMode_t;
+
 /*Refer to Figure 5-5. Main Clock Tree*/
 /*Refer to Table 5-3. Clock Source Options */
 extern void Rcc_InitSysClock(void)
@@ -62,32 +89,132 @@ extern void Rcc_InitSysClock(void)
     #endif
 }
 
-extern void Rcc_voidEnablePeripheral(Rcc_PeripheralType Peripheral_Id)
+extern void Rcc_voidEnablePeripheral(Rcc_PeripheralType Peripheral)
 {
-    switch (Peripheral_Id)
+    uint8 peripheralID;
+    uint8 mode;
+    uint8 subPeripheralOffset;
+    
+    /*Decoding: TWO BYTES:-   0x 0PMSS 
+    Byte(1) decides peripheal ID
+    Byte(0).High decides Mode  (0==RUN  1==Sleep  2==DeepSleep)
+    Byte(0).LOW  decides SubPeripheral Offset*/
+
+    peripheralID= (uint8) ( ((uint16) 0xFF00 &  Peripheral) >> 8u);
+    mode=(uint8) ( ((uint16) 0x00F0 & Peripheral) >> 4u);
+    subPeripheralOffset= (uint8)  ( (uint16)0x000F  & Peripheral); 
+
+    switch (peripheralID)
     {
-    case PERIPHIRAL_GPIO_PORTA:
-        SET_BIT(SYSCTRL_P2strRegs->RCGCGPIO, 0);
-        break;
-    case PERIPHIRAL_GPIO_PORTB:
-        SET_BIT(SYSCTRL_P2strRegs->RCGCGPIO, 1);
-        break;
-    case PERIPHIRAL_GPIO_PORTC:
-        SET_BIT(SYSCTRL_P2strRegs->RCGCGPIO, 2);
-        break;
-    case PERIPHIRAL_GPIO_PORTD:
-        SET_BIT(SYSCTRL_P2strRegs->RCGCGPIO, 3);
-        break;
-    case PERIPHIRAL_GPIO_PORTE:
-        SET_BIT(SYSCTRL_P2strRegs->RCGCGPIO, 4);
-        break;
-    case PERIPHIRAL_GPIO_PORTF:
-        SET_BIT(SYSCTRL_P2strRegs->RCGCGPIO, 5);
+    case WDG:
+        /*TODO: Complete Init*/;
         break;
 
+    case TIMER_16_32:
+        switch(mode)
+        {
+            case RUN_MODE:
+                SET_BIT(SYSCTRL_P2strRegs->RCGCTIMER, subPeripheralOffset);
+                break;
+            case SLEEP_MODE:
+            /*TODO: Complete Init*/
+                break;
+            case DEEPSLEEP_MODE:
+            /*TODO: Complete Init*/
+                break;    
+            default:
+                break;
+        }
+        break;
+    
+    case GPIO:
+        switch(mode)
+        {
+            case RUN_MODE:
+                SET_BIT(SYSCTRL_P2strRegs->RCGCGPIO, subPeripheralOffset);
+                break;
+            case SLEEP_MODE:
+            /*TODO: Complete Init*/
+                break;
+            case DEEPSLEEP_MODE:
+            /*TODO: Complete Init*/
+                break;    
+            default:
+                break;
+        }
+        
+        break;
+    
+    case DMA:
+        /*TODO: Complete Init*/;
+        break;
+    
+    case HIBERNATION:
+        /*TODO: Complete Init*/;
+        break;
+    
+    case UART:
+        /*TODO: Complete Init*/;
+        break;
 
-    /*Todo: Complete the rest of peripherals enable*/
+    case SPI:
+        /*TODO: Complete Init*/;
+        break;
+    
+    case I2C:
+        /*TODO: Complete Init*/;
+        break;
+    
+    case USB:
+        /*TODO: Complete Init*/;
+        break;
+    
+    case CAN:
+        /*TODO: Complete Init*/;
+        break;
+        
+    case ADC:
+        /*TODO: Complete Init*/;
+        break;
+    
+    case ANALOG_COMPARATOR:
+        /*TODO: Complete Init*/;
+        break;
+    
+    case PWM:
+        /*TODO: Complete Init*/
+        break;
+    
+    case QUADRATURE:
+        /*TODO: Complete Init*/
+        break;
+
+    case EEPROM:
+        /*TODO: Complete Init*/
+        break;
+                      
+    case TIMER_32_64:
+        switch(mode)
+        {
+            case RUN_MODE:
+                SET_BIT(SYSCTRL_P2strRegs->RCGCWTIMER, subPeripheralOffset);
+                /*TODO: Complete Init*/
+                break;
+            case SLEEP_MODE:
+            /*TODO: Complete Init*/
+                break;
+            case DEEPSLEEP_MODE:
+            /*TODO: Complete Init*/
+                break;    
+            default:
+                break;
+        }
+        
+        /*TODO: Complete Init*/
+        break;
+    
     default:
+        /*Error*/
         break;
     }
 }

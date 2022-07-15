@@ -10,6 +10,7 @@ void TIM_CallBack(void)
     #define ON_PERIOD    (1u)
     #define OFF_PERIOD   (0u)
     static uint32 timePassed=0;
+
     static uint8 currentPeriod=OFF_PERIOD;
 
     timePassed+=TIMER_TICK;
@@ -57,7 +58,11 @@ int main(void)
     /*Enable System Clock*/
     Rcc_InitSysClock();
     /*Enable GPIOA Clock*/
-    Rcc_voidEnablePeripheral(PERIPHIRAL_GPIO_PORTA);
+    Rcc_voidEnablePeripheral(PERIPH_GPIO_RUN_PA);
+    /*Enable TIMER_16_32_TIMER0 's Clock*/
+    Rcc_voidEnablePeripheral(PERIPH_TIMER_16_32_RUN_TIMER0);
+    /*Enable TIMER_32_64_TIMER0 's Clock*/
+    Rcc_voidEnablePeripheral(PERIPH_TIMER_32_64_RUN_TIMER0);
 
     /*Set AHB the bus for all GPIOs*/
     Rcc_GpioAllUseAHB();

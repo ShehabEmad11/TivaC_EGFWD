@@ -8,6 +8,8 @@ typedef signed char sint8;
 typedef signed short int sint16;
 typedef signed long int sint32;
 
+/* NULL_PTR define with a void pointer to zero definition*/
+#define NULL_PTR       ((void *)0)
 
 typedef enum
 {
@@ -19,8 +21,11 @@ typedef enum
 #define TRUE    (1u)
 #define FALSE   (0u)
 
-#define E_OK    (0u)
-#define E_NOK   (1u)
+typedef enum
+{    
+    E_OK=0,
+    E_NOK=1      
+}Std_ReturnType;
 
 #define STD_OFF (0u)
 #define STD_ON  (1u)
