@@ -37,9 +37,25 @@ enum GptPredefTimer1usEnablingGradeType
 #define CONCATENATED_ACCESS  (1u)
 #define CHANNEL_ACCESS_MODE  (INDIVIDUAL_ACCESS)
 
-#define GPT_STALL_DURING_DEBUG  TRUE
+#define GPT_STALL_DURING_DEBUG  FALSE
 
-#define NUMBER_GPT_CONFIGURED_CHANNELS   (1u)
+extern void App_WTIM0_CallBack(void);
+
+
+#define NUMBER_GPT_CONFIGURED_CHANNELS 1   
+
+#define GPT_CHANNELS_CONFIGURATION  \
+{\
+/*.channelID             */   TIMER_32_64_TIMER0,\
+/*.channelMode           */   GPT_CH_MODE_CONTINUOUS,\
+/*.channelFreqHz         */   16,\
+/*.channelTickValMax     */   (uint32)0x00FFFFFF,\
+/*.channelNotificationCbk*/   App_WTIM0_CallBack,\
+/*.channelCountDirection */   COUNT_DOWN_DIRECTION,\
+/*.channelBitWidth       */   BITWIDH_32,\
+/*.channelPrescaler      */   PRESCALER_VAL_0\
+}
+
 
 
 #endif /* GPT_CFG_H */

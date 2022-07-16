@@ -25,6 +25,16 @@ void IntrCtrl_voidInit(void)
     Exceptions_astrConfig[INTERRUPT_16_32Timer_0A].isEnabled=TRUE;
     Exceptions_astrConfig[INTERRUPT_16_32Timer_0A].groupPriority=1;
     Exceptions_astrConfig[INTERRUPT_16_32Timer_0A].subGroupPriority=1;
+
+    Exceptions_astrConfig[INTERRUPT_16_32Timer_1A].isConfigurable=TRUE;
+    Exceptions_astrConfig[INTERRUPT_16_32Timer_1A].isEnabled=TRUE;
+    Exceptions_astrConfig[INTERRUPT_16_32Timer_1A].groupPriority=1;
+    Exceptions_astrConfig[INTERRUPT_16_32Timer_1A].subGroupPriority=1;
+
+    Exceptions_astrConfig[INTERRUPT_32_64_Timer_0A].isConfigurable=TRUE;
+    Exceptions_astrConfig[INTERRUPT_32_64_Timer_0A].isEnabled=TRUE;
+    Exceptions_astrConfig[INTERRUPT_32_64_Timer_0A].groupPriority=1;
+    Exceptions_astrConfig[INTERRUPT_32_64_Timer_0A].subGroupPriority=1;
     for(exceptionIter=16; exceptionIter<NUMBER_EXCEPTIONS; exceptionIter++)
     {
         if(Exceptions_astrConfig[exceptionIter].isConfigurable==TRUE)

@@ -2,26 +2,23 @@
 #include "Gpt_Types.h"
 #include "Gpt_Cfg.h"
 
-#if 0
-extern void cbk (void)
+//const static Gpt_ChannelConfigType GptChannelConfigs=GPT_CHANNELS_CONFIGURATION;
+
+/*
+    {
+        .channelID=TIMER_32_64_TIMER0,
+        .channelMode=GPT_CH_MODE_CONTINUOUS,
+        .channelFreqHz=16,
+        .channelTickValMax=(uint32)0x00FFFFFF,
+        .channelNotificationCbk=TIM_CallBack,
+        .channelCountDirection= COUNT_DOWN_DIRECTION,
+        .channelBitWidth=   BITWIDH_32,
+        .channelPrescaler=PRESCALER_VAL_0
+    },
+*/
+
+const Gpt_ChannelConfigType GptChannelConfigs[NUMBER_GPT_CONFIGURED_CHANNELS]=
 {
-    asm("nop");
-}
-
-
-#define GPT_CHANNELS_CONFIGURATION   \
-{\
-TIMER_32_64_TIMER0,GPT_CH_MODE_CONTINUOUS,16,4294967295ul,cbk,COUNT_DOWN_DIRECTION,BITWIDH_32,PRESCALER_VAL_0\
-}
-
-#define GPT_CONFIG          \
-{\
-    NUMBER_GPT_CONFIGURED_CHANNELS,{GPT_CHANNELS_CONFIGURATION}\
-}
-
-
-const Gpt_ConfigType GptChannelConfigs[]= GPT_CONFIG ;
-#endif
-
-
-const Gpt_ConfigType GptChannelConfigs[] ;
+    GPT_CHANNELS_CONFIGURATION
+};
+const Gpt_ConfigType GptConfig={NUMBER_GPT_CONFIGURED_CHANNELS,&GptChannelConfigs};

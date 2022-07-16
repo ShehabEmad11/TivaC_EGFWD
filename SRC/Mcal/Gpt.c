@@ -131,13 +131,9 @@ the timer and continues counting after the time-out event.
 /**********************************************************************************************************************
  *  LOCAL DATA 
  *********************************************************************************************************************/
-
-
-extern const Gpt_ConfigType GptChannelConfigs[];
-
-static GptInternal_InfoType Gpt_astrChannelsInfo[NUMBER_GPT_CONFIGURED_CHANNELS];
-
+const  Gpt_ConfigType*  P2GptConfig;
 static Gpt_ModeType Gpt_Driver_State=uninitialized; 
+static GptInternal_ChannelInfo          ChannelsArrInfo[NUMBER_GPT_CHANNELS];
 /**********************************************************************************************************************
  *  GLOBAL DATA
  *********************************************************************************************************************/
@@ -156,11 +152,12 @@ static Gpt_ModeType Gpt_Driver_State=uninitialized;
 
 extern void Gpt_Init(const Gpt_ConfigType* ConfigPtr)
 {
-    Gpt_ChannelType Iter;
+    /*Create channelConfigIdxator (it will iterate over CONFIGURED channels only not all channels)*/
+    uint16 channelConfigIdx;
 
     Gpt_ChannelType              channelID;
     GptChannelMode               channelMode;
-    GptInternal_FreqType         channelFreq ;
+    GptInternal_FreqType         channelFreqHz ;
     Gpt_ValueType                channelTickValMax;   
     GptPtrNotificationCbkType    channelNotificationCbk;
 
@@ -168,6 +165,7 @@ extern void Gpt_Init(const Gpt_ConfigType* ConfigPtr)
     GptInternal_BitSizeType         channelBitWidth;
     GptInternal_PrescalerType       channelPrescaler;
 
+    GptInternal_StateType           channelState;
     GPTMRegs_t *channelPtrRegBase=NULL_PTR;
 
     if(Gpt_Driver_State != uninitialized)
@@ -189,30 +187,44 @@ extern void Gpt_Init(const Gpt_ConfigType* ConfigPtr)
         /*Todo: PreDefined Timer / Normal Timer Init Sequence*/
 
     #else/*If PreDefined Timer is Disabled:*/  
-        for(Iter=0; Iter< ConfigPtr->numberChannels; Iter++)
+        /*Copy Configuration to file scope static variable*/
+        P2GptConfig=ConfigPtr;
+        
+        for(channelConfigIdx=0; channelConfigIdx< ConfigPtr->numberChannels; channelConfigIdx++)
         {
-            if(GptChannelConfigs[Iter].channelsCfg.channelBitWidth==0 
-            || GptChannelConfigs[Iter].channelsCfg.channelBitWidth > 64)
+            channelID=ConfigPtr->p2ChannelsCfg[channelConfigIdx].channelID;
+            channelMode=ConfigPtr->p2ChannelsCfg[channelConfigIdx].channelMode;
+            /*TODO: Configured but not yet used in driver*/
+            channelFreqHz=ConfigPtr->p2ChannelsCfg[channelConfigIdx].channelFreqHz;
+            /*TODO: Configured but not yet used in driver*/
+            channelTickValMax=ConfigPtr->p2ChannelsCfg[channelConfigIdx].channelTickValMax;
+
+            channelCountDirection=ConfigPtr->p2ChannelsCfg[channelConfigIdx].channelCountDirection;
+            
+            /*TODO: Configured but not yet used in driver*/
+            channelBitWidth=ConfigPtr->p2ChannelsCfg[channelConfigIdx].channelBitWidth;
+            /*TODO: Configured but not yet used in driver*/
+            channelPrescaler=ConfigPtr->p2ChannelsCfg[channelConfigIdx].channelPrescaler;
+            
+            
+            /*ChannelsArrStates is static variable with STATE_NOT_INITIALIZED by default*/
+            channelState=ChannelsArrInfo[channelID].channelState ;
+
+            if(channelState != STATE_NOT_INITIALIZED)
+            {
+                /*Error Channel Already Initialized*/
+                return;
+            }
+
+            ChannelsArrInfo[channelID].channelCbk=ConfigPtr->p2ChannelsCfg[channelConfigIdx].channelNotificationCbk;
+
+            if(channelBitWidth!=BITWIDH_16 && channelBitWidth!=BITWIDH_24
+                && channelBitWidth!=BITWIDH_32 && channelBitWidth != BITWIDH_64)
             {
                 /*Error Wrong Channel Width*/
                 return;
             }
 
-            channelID=ConfigPtr->channelsCfg.channelID;
-            channelMode=ConfigPtr->channelsCfg.channelMode;
-            /*TODO: Configured but not yet used in driver*/
-            channelFreq=ConfigPtr->channelsCfg.channelFreq;
-            /*TODO: Configured but not yet used in driver*/
-            channelTickValMax=ConfigPtr->channelsCfg.channelTickValMax;
-            /*TODO: Configured but not yet used in driver*/
-            channelNotificationCbk=ConfigPtr->channelsCfg.channelNotificationCbk;
-
-            channelCountDirection=ConfigPtr->channelsCfg.channelCountDirection;
-            
-            /*TODO: Configured but not yet used in driver*/
-            channelBitWidth=ConfigPtr->channelsCfg.channelBitWidth;
-            /*TODO: Configured but not yet used in driver*/
-            channelPrescaler=ConfigPtr->channelsCfg.channelPrescaler;
             if(channelID<TIMER_32_64_TIMER2)
             {
                 channelPtrRegBase = GPTM_TIMER0_16_32_To_TIMER1_32_64_P2strRegs + channelID;
@@ -278,8 +290,7 @@ extern void Gpt_Init(const Gpt_ConfigType* ConfigPtr)
             channelPtrRegBase->GPTMIMR.regAccess=0x00;
 
             /*Set Channel State as initialized*/
-            Gpt_astrChannelsInfo[Iter].channelState=STATE_INITIALIZED;
-            
+            ChannelsArrInfo[channelID].channelState=STATE_INITIALIZED;
         }
         Gpt_Driver_State=GPT_MODE_NORMAL;
     #endif
@@ -306,11 +317,14 @@ extern Gpt_ValueType Gpt_GetTimeRemaining( Gpt_ChannelType Channel )
 * \Return value:   : void  
 *                                   
 *******************************************************************************/
-
 extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
 {
     uint32 mask;
     GPTMRegs_t *channelPtrRegBase=NULL_PTR;
+
+    /*channelConfigIdx will be used to extract info from configurations*/
+    uint16 channelConfigIdx=0;
+    uint16 configIter;
 
     #if ( (GptPredefTimer100us32bitEnable != FALSE) )
         /*If PreDefined Timer is enabled:*/    
@@ -331,13 +345,13 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
     #endif
 
     ENTER_CRITICAL_SECTION();
-    if(Gpt_astrChannelsInfo[Channel].channelState == STATE_NOT_INITIALIZED)
+    if(ChannelsArrInfo[Channel].channelState == STATE_NOT_INITIALIZED)
     {
         EXIT_CRITICAL_SECTION();
         /*Error Channel Not Initialized Yet*/
         return;
     }
-    else if(Gpt_astrChannelsInfo[Channel].channelState == STATE_RUNNING)
+    else if(ChannelsArrInfo[Channel].channelState == STATE_RUNNING)
     {
         EXIT_CRITICAL_SECTION();
         /*Error Re-entrant*/
@@ -346,19 +360,34 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
     EXIT_CRITICAL_SECTION();
 
 
-    if(Channel>NUMBER_TIMER_CHANNELS)
+    if(Channel>NUMBER_GPT_CHANNELS)
     {
-        /*Error Wrong Channel Config*/
+        /*Error Wrong Channel Number*/
         return;
     }
 
-    if(Value==0 || Value > GptChannelConfigs[Channel].channelsCfg.channelTickValMax)
+    for(configIter=0;configIter< P2GptConfig->numberChannels; configIter++)
+    {
+        /*Check if passed channel is configured*/
+        if(Channel == P2GptConfig->p2ChannelsCfg[configIter].channelID)
+        {
+            channelConfigIdx=configIter;
+            break;
+        }
+    }
+    if(channelConfigIdx != configIter)
+    {
+        /*If Channel Not Configured*/
+        return;
+    }
+
+    if(Value==0 || Value > P2GptConfig->p2ChannelsCfg[channelConfigIdx].channelTickValMax)
     {
         /*Error Wrong Value Passed*/
         return;
     }
 
-    switch(GptChannelConfigs[Channel].channelsCfg.channelBitWidth)
+    switch(P2GptConfig->p2ChannelsCfg[channelConfigIdx].channelBitWidth)
         {
         case BITWIDH_16:
             mask=0x0000FFFF;
@@ -399,21 +428,23 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
     #if CHANNEL_ACCESS_MODE == INDIVIDUAL_ACCESS  
     {
         /*Set Number of Ticks*/
-        channelPtrRegBase->GPTMTAILR=Value & mask;
+        //channelPtrRegBase->GPTMTAILR=Value & mask;
 
-        if(GptChannelConfigs[Channel].channelsCfg.channelCountDirection==COUNT_UP_DIRECTION)
+        if(P2GptConfig->p2ChannelsCfg[channelConfigIdx].channelCountDirection==COUNT_UP_DIRECTION)
         {
             /*Todo: Write Prescaler*/
             
             /*Reset Counting Register*/
-            channelPtrRegBase->GPTMTAV=0x00000000 & mask;
+            //channelPtrRegBase->GPTMTAV=0x00000000 & mask;
+            channelPtrRegBase->GPTMTAILR=Value;
         }
         else
         {
             /*Todo: Write Prescaler*/
             
             /*Reset Counting Register*/
-            channelPtrRegBase->GPTMTAV=0xFFFFFFFF & mask;
+            //channelPtrRegBase->GPTMTAV=Value & mask;
+            channelPtrRegBase->GPTMTAILR=Value;
         }
     }
     #elif   CHANNEL_ACCESS_MODE == CONCATENATED_ACCESS
@@ -425,16 +456,19 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
         #error Wrong Access Configuration
     #endif
 
-
+    channelPtrRegBase->GPTMTAMR.fieldAccess.TAILD=1;
 
     /*ENABLE TimerA Timeout iNTERRUPT from mask register */
-    channelPtrRegBase->GPTMIMR.fieldAccess.TATOIM=1;
+//    channelPtrRegBase->GPTMIMR.fieldAccess.TATOIM=1;
+
+    channelPtrRegBase->GPTMIMR.regAccess=1;
 
     /*Enable Timer*/
-    channelPtrRegBase->GPTMCTL.fieldAccess.TAEN=1;
+//    channelPtrRegBase->GPTMCTL.fieldAccess.TAEN=1;
+    channelPtrRegBase->GPTMCTL.regAccess=0x1;
 
     /*Flag Channel State as running*/
-    Gpt_astrChannelsInfo[Channel].channelState = STATE_RUNNING;
+    ChannelsArrInfo[Channel].channelState = STATE_RUNNING;
 }
 
 extern void Gpt_StopTimer( Gpt_ChannelType Channel )
@@ -455,6 +489,235 @@ extern Std_ReturnType Gpt_GetPredefTimerValue( Gpt_PredefTimerType PredefTimer, 
 {
 
 }
+
+
+
+extern void Gpt_Notification_TIMER0A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk();
+    }
+}
+
+extern void Gpt_Notification_TIMER0B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER1A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER1B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER2A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER2B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER3A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER3B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER4A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER4B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk();
+    }
+}
+extern void Gpt_Notification_TIMER5A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk();
+    }
+}
+
+extern void Gpt_Notification_TIMER5B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk();
+    }
+}
+
+
+
+
+extern void Gpt_Notification_WTIMER0A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk();
+    }
+}
+
+extern void Gpt_Notification_WTIMER0B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER1A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER1B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER2A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER2B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER3A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER3B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER4A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER4B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk();
+    }
+}
+extern void Gpt_Notification_WTIMER5A(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk();
+    }
+}
+
+extern void Gpt_Notification_WTIMER5B(void)
+{
+
+    if(ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk != NULL_PTR 
+    && ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk != 0) 
+    {
+        ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk();
+    }
+}
+
+
 
 #if 0
 extern void Gpt_SetMode( Gpt_ModeType Mode )

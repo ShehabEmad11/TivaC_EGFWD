@@ -2,7 +2,6 @@
 #define GPT_TYPES_H
 
 #include "Std_Types.h"
-//#include "Gpt_Cfg.h"
 
 
 typedef enum
@@ -21,7 +20,7 @@ typedef enum
 	TIMER_32_64_TIMER4 ,
 	TIMER_32_64_TIMER5 , 
 
-    NUMBER_TIMER_CHANNELS=12
+    NUMBER_GPT_CHANNELS=12
 }Gpt_ChannelType;
 
 typedef uint32 Gpt_ValueType;
@@ -60,12 +59,21 @@ typedef enum
     STATE_EXPIRED
 }GptInternal_StateType;
 
+typedef void(*Ptr2VoidFunction_t)(void);
+
+typedef struct 
+{
+    GptInternal_StateType   channelState;
+    Ptr2VoidFunction_t      channelCbk;
+}GptInternal_ChannelInfo;
+
+
 typedef enum
 {
-    BITWIDH_16,
-    BITWIDH_24,
-    BITWIDH_32,
-    BITWIDH_64
+    BITWIDH_16=16,
+    BITWIDH_24=24,
+    BITWIDH_32=32,
+    BITWIDH_64=64
 }GptInternal_BitSizeType;
 
 typedef enum
@@ -78,11 +86,6 @@ typedef enum
 {
     PRESCALER_VAL_0
 }GptInternal_PrescalerType;
-typedef  struct
-{
-    GptInternal_StateType           channelState;
-}GptInternal_InfoType;
-
 
 
 typedef uint8 GptInternal_FreqType;
@@ -91,7 +94,7 @@ typedef struct
 {  
     Gpt_ChannelType                 channelID;
     GptChannelMode                  channelMode;
-    GptInternal_FreqType            channelFreq ;
+    GptInternal_FreqType            channelFreqHz ;
     Gpt_ValueType                   channelTickValMax;   
     GptPtrNotificationCbkType       channelNotificationCbk;
 
@@ -102,7 +105,7 @@ typedef struct
 
 typedef struct
 {
-    uint8                        numberChannels;  
-    Gpt_ChannelConfigType       channelsCfg;                
+    const uint8                        numberChannels;  
+    const Gpt_ChannelConfigType       *p2ChannelsCfg;                
 }Gpt_ConfigType;
 #endif /* GPT_TYPES_H */

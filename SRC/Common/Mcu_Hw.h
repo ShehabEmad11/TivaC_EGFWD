@@ -227,7 +227,7 @@ typedef struct
 	uint32 SRCR2       ;      /*Offset= 0x048*/ 
 	/*Legacy END*/            
 
-	uint32 Reserved1;
+	uint32 Reserved1;									
 						  
 	uint32 RIS         ;      /*Offset= 0x050*/ 
 	uint32 IMC         ;      /*Offset= 0x054*/ 
@@ -245,7 +245,7 @@ typedef struct
 	uint32 MOSCCTL     ;      /*Offset= 0x07C*/ 
 
 
-	uint32 Reserved4[20];
+	uint32 Reserved4[32];								
 							  
 	/*Legacy*/                
 	uint32 RCGC0	   ;  	  /*Offset= 0x100*/
@@ -267,7 +267,7 @@ typedef struct
 
 	uint32 PLLFREQ0    ;      /*Offset= 0x160*/ 
 	uint32 PLLFREQ1    ;      /*Offset= 0x164*/ 
-	uint32 PLLSTAT     ;      /*Offset= 0x168*/ 
+	uint32 PLLSTAT     ;      /*Offset= 0x168*/ 		
 
 	uint32 Reserved7_1[7]   ;
 
@@ -278,7 +278,7 @@ typedef struct
 
 	uint32 LDOSPCTL    ;      /*Offset= 0x1B4*/ 
 	uint32 LDOSPCAL    ;      /*Offset= 0x1B8*/ 
-	uint32 LDODPCTL    ;      /*Offset= 0x1BC*/ 
+	uint32 LDODPCTL    ;      /*Offset= 0x1BC*/ 			
 	uint32 LDODPCAL    ;      /*Offset= 0x1C0*/ 
 
 	uint32 Reserved9[2];
@@ -311,12 +311,12 @@ typedef struct
 	uint32 PPPWM       ;       /*Offset= 0x340*/ 
 	uint32 PPQEI       ;       /*Offset= 0x344*/ 
 
-	uint32 Reserved15[4];
+	uint32 Reserved15[4];								
 
 	uint32 PPEEPROM    ;       /*Offset= 0x358*/ 
 	uint32 PPWTIMER    ;       /*Offset= 0x35C*/ 
 
-	uint32 Reserved16[104];
+	uint32 Reserved16[104];								
 
 	uint32 SRWD        ;       /*Offset= 0x500*/ 
 	uint32 SRTIMER     ;       /*Offset= 0x504*/ 
@@ -334,7 +334,7 @@ typedef struct
 
 	uint32 SRUSB       ;       /*Offset= 0x528*/ 
 
-	uint32 Reserved19[2];
+	uint32 Reserved19[2];								
 
 
 	uint32 SRCAN       ;       /*Offset= 0x534*/ 
@@ -343,7 +343,7 @@ typedef struct
 	uint32 SRPWM       ;       /*Offset= 0x540*/ 
 	uint32 SRQEI       ;       /*Offset= 0x544*/ 
 
-	uint32 Reserved20[4];
+	uint32 Reserved20[4];								
 
 	uint32 SREEPROM    ;       /*Offset= 0x558*/ 
 	uint32 SRWTIMER    ;       /*Offset= 0x55C*/ 
@@ -360,7 +360,7 @@ typedef struct
 	uint32 RCGCHIB      ;      /*Offset= 0x614*/ 
 	uint32 RCGCUART     ;      /*Offset= 0x618*/ 
 	uint32 RCGCSSI      ;      /*Offset= 0x61C*/ 
-	uint32 RCGCI2C      ;      /*Offset= 0x620*/ 
+	uint32 RCGCI2C      ;      /*Offset= 0x620*/ 	
 
 	uint32 Reserved23;
 
@@ -376,7 +376,7 @@ typedef struct
 
 	uint32 Reserved25[4];
 	 
-	uint32 RCGCEEPROM   ;      /*Offset= 0x658*/ 
+	uint32 RCGCEEPROM   ;      /*Offset= 0x658*/ 			//395
 	uint32 RCGCWTIMER   ;      /*Offset= 0x65C*/ 
 
 	uint32 Reserved26[40];
