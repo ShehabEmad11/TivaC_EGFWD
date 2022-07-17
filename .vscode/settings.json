@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "mcu_hw.h": "c",
+        "port.h": "c",
+        "port_types.h": "c",
+        "std_types.h": "c",
+        "rcc_types.h": "c",
+        "rcc.h": "c",
+        "gpt.h": "c",
+        "gpt_types.h": "c",
+        "gpt_cfg.h": "c"
+    }
+}
