@@ -388,7 +388,7 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
     }
 
     switch(P2GptConfig->p2ChannelsCfg[channelConfigIdx].channelBitWidth)
-        {
+    {
         case BITWIDH_16:
             mask=0x0000FFFF;
             break;
@@ -471,9 +471,103 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
     ChannelsArrInfo[Channel].channelState = STATE_RUNNING;
 }
 
+/******************************************************************************
+* \Syntax          : void Gpt_StopTimer(Gpt_ChannelType Channel)        
+* \Description     : Service to Stop Timer of specific channel                               
+*                                                                             
+* \Sync\Async      : Synchronous                                               
+* \Reentrancy      : Reentrant (not for same channel ID)                                          
+* \Parameters (in) : Channel <channel ID>                
+* \Parameters (out): None                                                      
+* \Return value:   : void  
+*                                   
+*******************************************************************************/
 extern void Gpt_StopTimer( Gpt_ChannelType Channel )
 {
+    uint32 mask;
+    GPTMRegs_t *channelPtrRegBase=NULL_PTR;
 
+    /*channelConfigIdx will be used to extract info from configurations*/
+    uint16 channelConfigIdx=0;
+    uint16 configIter;
+
+    ENTER_CRITICAL_SECTION();
+    if(ChannelsArrInfo[Channel].channelState == STATE_NOT_INITIALIZED)
+    {
+        EXIT_CRITICAL_SECTION();
+        /*Error Channel Not Initialized Yet*/
+        return;
+    }
+    else if(ChannelsArrInfo[Channel].channelState != STATE_RUNNING)
+    {
+        EXIT_CRITICAL_SECTION();
+        /*Channel Not running   (this is not an error accoding to AUTOSAR)*/
+        return;
+    }
+    EXIT_CRITICAL_SECTION();
+
+
+    if(Channel>NUMBER_GPT_CHANNELS)
+    {
+        /*Error Wrong Channel Number*/
+        return;
+    }
+
+    for(configIter=0;configIter< P2GptConfig->numberChannels; configIter++)
+    {
+        /*Check if passed channel is configured*/
+        if(Channel == P2GptConfig->p2ChannelsCfg[configIter].channelID)
+        {
+            channelConfigIdx=configIter;
+            break;
+        }
+    }
+    if(channelConfigIdx != configIter)
+    {
+        /*If Channel Not Configured*/
+        return;
+    }
+
+    switch(P2GptConfig->p2ChannelsCfg[channelConfigIdx].channelBitWidth)
+        {
+        case BITWIDH_16:
+            mask=0x0000FFFF;
+            break;
+        
+        case BITWIDH_24:
+            mask=0x00FFFFFF;
+            break;
+
+        case BITWIDH_32:
+            mask=0xFFFFFFFF;
+            break;
+
+        case BITWIDH_64:
+            mask=0xFFFFFFFF;
+            break;
+
+        default:
+            mask=0xFFFFFFFF;
+            break;
+    } 
+
+    if(Channel<TIMER_32_64_TIMER2)
+    {
+        channelPtrRegBase = GPTM_TIMER0_16_32_To_TIMER1_32_64_P2strRegs + Channel;
+    }
+    else if(Channel>=TIMER_32_64_TIMER2)
+    {
+        channelPtrRegBase = GPTM_TIMER2To5_32_64_P2strRegs+(Channel-TIMER_32_64_TIMER2);
+    }
+
+    /*Disable Timer */
+    channelPtrRegBase->GPTMCTL.fieldAccess.TAEN=0;
+
+    /*Clear TIMERA Timeout Pending Interrupts*/;
+    channelPtrRegBase->GPTMICR.fieldAccess.TATOCINT=1;
+
+    /*Flag Channel State as running*/
+    ChannelsArrInfo[Channel].channelState = STATE_STOPPED;
 }
 
 extern void Gpt_EnableNotification( Gpt_ChannelType Channel )
@@ -491,7 +585,7 @@ extern Std_ReturnType Gpt_GetPredefTimerValue( Gpt_PredefTimerType PredefTimer, 
 }
 
 
-
+/*===========================START OF TIMER CB NOTIFICATIONS==========================================*/
 extern void Gpt_Notification_TIMER0A(void)
 {
 
@@ -499,6 +593,12 @@ extern void Gpt_Notification_TIMER0A(void)
     && ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk();
+    }
+
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER0].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER0].channelState = STATE_EXPIRED;
     }
 }
 
@@ -510,6 +610,12 @@ extern void Gpt_Notification_TIMER0B(void)
     {
         ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk();
     }
+    
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER0].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER0].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_TIMER1A(void)
 {
@@ -518,6 +624,11 @@ extern void Gpt_Notification_TIMER1A(void)
     && ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER1].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER1].channelState = STATE_EXPIRED;
     }
 }
 extern void Gpt_Notification_TIMER1B(void)
@@ -528,6 +639,11 @@ extern void Gpt_Notification_TIMER1B(void)
     {
         ChannelsArrInfo[TIMER_16_32_TIMER1].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER1].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER1].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_TIMER2A(void)
 {
@@ -536,6 +652,11 @@ extern void Gpt_Notification_TIMER2A(void)
     && ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER2].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER2].channelState = STATE_EXPIRED;
     }
 }
 extern void Gpt_Notification_TIMER2B(void)
@@ -546,6 +667,11 @@ extern void Gpt_Notification_TIMER2B(void)
     {
         ChannelsArrInfo[TIMER_16_32_TIMER2].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER2].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER2].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_TIMER3A(void)
 {
@@ -554,6 +680,11 @@ extern void Gpt_Notification_TIMER3A(void)
     && ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER3].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER3].channelState = STATE_EXPIRED;
     }
 }
 extern void Gpt_Notification_TIMER3B(void)
@@ -564,6 +695,11 @@ extern void Gpt_Notification_TIMER3B(void)
     {
         ChannelsArrInfo[TIMER_16_32_TIMER3].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER3].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER3].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_TIMER4A(void)
 {
@@ -572,6 +708,11 @@ extern void Gpt_Notification_TIMER4A(void)
     && ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER4].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER4].channelState = STATE_EXPIRED;
     }
 }
 extern void Gpt_Notification_TIMER4B(void)
@@ -582,6 +723,11 @@ extern void Gpt_Notification_TIMER4B(void)
     {
         ChannelsArrInfo[TIMER_16_32_TIMER4].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER4].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER4].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_TIMER5A(void)
 {
@@ -590,6 +736,11 @@ extern void Gpt_Notification_TIMER5A(void)
     && ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER5].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER5].channelState = STATE_EXPIRED;
     }
 }
 
@@ -600,6 +751,11 @@ extern void Gpt_Notification_TIMER5B(void)
     && ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_16_32_TIMER5].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER5].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_16_32_TIMER5].channelState = STATE_EXPIRED;
     }
 }
 
@@ -614,6 +770,11 @@ extern void Gpt_Notification_WTIMER0A(void)
     {
         ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER0].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER0].channelState = STATE_EXPIRED;
+    }
 }
 
 extern void Gpt_Notification_WTIMER0B(void)
@@ -624,6 +785,11 @@ extern void Gpt_Notification_WTIMER0B(void)
     {
         ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER0].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER0].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_WTIMER1A(void)
 {
@@ -632,6 +798,11 @@ extern void Gpt_Notification_WTIMER1A(void)
     && ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER1].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER1].channelState = STATE_EXPIRED;
     }
 }
 extern void Gpt_Notification_WTIMER1B(void)
@@ -642,6 +813,11 @@ extern void Gpt_Notification_WTIMER1B(void)
     {
         ChannelsArrInfo[TIMER_32_64_TIMER1].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER1].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER1].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_WTIMER2A(void)
 {
@@ -650,6 +826,11 @@ extern void Gpt_Notification_WTIMER2A(void)
     && ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER2].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER2].channelState = STATE_EXPIRED;
     }
 }
 extern void Gpt_Notification_WTIMER2B(void)
@@ -660,6 +841,11 @@ extern void Gpt_Notification_WTIMER2B(void)
     {
         ChannelsArrInfo[TIMER_32_64_TIMER2].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER2].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER2].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_WTIMER3A(void)
 {
@@ -668,6 +854,11 @@ extern void Gpt_Notification_WTIMER3A(void)
     && ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER3].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER3].channelState = STATE_EXPIRED;
     }
 }
 extern void Gpt_Notification_WTIMER3B(void)
@@ -678,6 +869,11 @@ extern void Gpt_Notification_WTIMER3B(void)
     {
         ChannelsArrInfo[TIMER_32_64_TIMER3].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER3].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER3].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_WTIMER4A(void)
 {
@@ -686,6 +882,11 @@ extern void Gpt_Notification_WTIMER4A(void)
     && ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER4].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER4].channelState = STATE_EXPIRED;
     }
 }
 extern void Gpt_Notification_WTIMER4B(void)
@@ -696,6 +897,11 @@ extern void Gpt_Notification_WTIMER4B(void)
     {
         ChannelsArrInfo[TIMER_32_64_TIMER4].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER4].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER4].channelState = STATE_EXPIRED;
+    }
 }
 extern void Gpt_Notification_WTIMER5A(void)
 {
@@ -704,6 +910,11 @@ extern void Gpt_Notification_WTIMER5A(void)
     && ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk != 0) 
     {
         ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk();
+    }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER5].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER5].channelState = STATE_EXPIRED;
     }
 }
 
@@ -715,8 +926,13 @@ extern void Gpt_Notification_WTIMER5B(void)
     {
         ChannelsArrInfo[TIMER_32_64_TIMER5].channelCbk();
     }
+    if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER5].channelMode==GPT_CH_MODE_ONESHOT)
+    {
+        /*Flag Channel State as EXPIRED in case of one SHot mode*/
+        ChannelsArrInfo[TIMER_32_64_TIMER5].channelState = STATE_EXPIRED;
+    }
 }
-
+/*============================END of timer CB Notifications==================================*/
 
 
 #if 0
