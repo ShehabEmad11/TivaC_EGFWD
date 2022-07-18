@@ -10,7 +10,7 @@
 #include "Rcc.h"
 #include "Rcc_Cfg.h"
 #include "Rcc_Types.h"
-#include "Mcu_Hw.h"
+#include "Rcc_Private.h"
 
 
 typedef enum

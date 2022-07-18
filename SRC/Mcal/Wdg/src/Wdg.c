@@ -1,5 +1,5 @@
 #include "Wdg.h"
-
+#if 0
 
 /*Config Parameters:
 NotificationEN      (CallBack Func Ptr)
@@ -16,3 +16,6 @@ void Wdg_SetTriggerCondition(uint16 timeout)        //timeout in ms
 {
 
 }
+
+
+#endif

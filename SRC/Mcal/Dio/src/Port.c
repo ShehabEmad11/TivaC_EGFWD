@@ -23,7 +23,7 @@ PortPinOutputCurrent
 
 #include "Port.h"
 #include "Port_Cfg.h"
-#include "Mcu_Hw.h"
+#include "Port_Private.h"
 #include "Macros.h"
 
 

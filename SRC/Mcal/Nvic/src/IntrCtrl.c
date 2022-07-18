@@ -2,7 +2,7 @@
 #include "IntrCtrl.h"
 #include "IntrCtrl_Types.h"
 #include "IntrCtrl_Cfg.h"
-#include "Mcu_Hw.h"
+#include "IntrCtrl_Private.h"
 
 
 

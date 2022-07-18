@@ -8,6 +8,8 @@
         "rcc.h": "c",
         "gpt.h": "c",
         "gpt_types.h": "c",
-        "gpt_cfg.h": "c"
+        "gpt_cfg.h": "c",
+        "port_private.h": "c",
+        "dio.h": "c"
     }
 }
