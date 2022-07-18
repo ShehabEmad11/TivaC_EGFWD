@@ -53,7 +53,7 @@ extern void App_WTIM0_CallBack(void);
 /*.channelNotificationCbk*/   App_WTIM0_CallBack,\
 /*.channelCountDirection */   COUNT_DOWN_DIRECTION,\
 /*.channelBitWidth       */   BITWIDH_32,\
-/*.channelPrescaler      */   PRESCALER_VAL_0\
+/*.channelPrescaler      */   PRESCALER_VAL_1\
 }
 
 

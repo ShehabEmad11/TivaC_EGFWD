@@ -286,6 +286,9 @@ extern void Gpt_Init(const Gpt_ConfigType* ConfigPtr)
                 channelPtrRegBase->GPTMCTL.fieldAccess.TASTALL=0;
             #endif
 
+            /*Adjust Prescaler*/
+            channelPtrRegBase->GPTMTAPR = channelPrescaler;
+
             /*Disable All GPT Interrupts*/
             channelPtrRegBase->GPTMIMR.regAccess=0x00;
 

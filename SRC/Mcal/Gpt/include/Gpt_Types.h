@@ -84,7 +84,8 @@ typedef enum
 
 typedef enum
 {
-    PRESCALER_VAL_0
+    PRESCALER_VAL_0,
+    PRESCALER_VAL_1
 }GptInternal_PrescalerType;
 
 
