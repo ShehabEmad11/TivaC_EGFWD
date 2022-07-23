@@ -1,15 +1,6 @@
 #ifndef DIO_TYPES_H
 #define DIO_TYPES_H
 
-/*Task1:
-DIO DRIVER:
-API TYPES::
-Dio_ChannelType----->enum PINS
-Dio_PortType-------->enum Ports
-Dio_LevelType------->High/LOw
-Dio_PortLevelType--->0--255
-*/
-
 #include "Std_Types.h"
 
 typedef enum 

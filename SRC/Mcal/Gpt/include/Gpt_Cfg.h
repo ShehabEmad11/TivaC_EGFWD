@@ -49,11 +49,11 @@ extern void App_WTIM0_CallBack(void);
 /*.channelID             */   TIMER_32_64_TIMER0,\
 /*.channelMode           */   GPT_CH_MODE_CONTINUOUS,\
 /*.channelFreqHz         */   16,\
-/*.channelTickValMax     */   (uint32)0x00FFFFFF,\
+/*.channelTickValMax     */   (uint32)0xFFFFFFFF,\
 /*.channelNotificationCbk*/   App_WTIM0_CallBack,\
 /*.channelCountDirection */   COUNT_DOWN_DIRECTION,\
 /*.channelBitWidth       */   BITWIDH_32,\
-/*.channelPrescaler      */   PRESCALER_VAL_1\
+/*.channelPrescaler      */   PRESCALER_VAL_0\
 }
 
 

@@ -1,21 +1,3 @@
-
-/*Task1:
-No User Configurations
-BIT BANDING/BIT MASK
-functions must be re-entrant  (read-Modify_write not exist)
-
-API Functions:
-Dio_LevelType Dio_ReadChannel (Dio_ChannelType ChannelId)
-void Dio_WriteChannel (Dio_ChannelType ChannelId , Dio_LevelType Level)
-Dio_PortLevelType Dio_ReadPort (Dio_PortType PortId)
-void Dio_WritePort (Dio_PortType PortId , Dio_PortLevelType Level)
-Dio_LevelType Dio_FlipChannel (Dio_ChannelType ChannelId)
-*/
-
-/*
-All GPIO signals are 5-V tolerant when configured as inputs
-except for PD4, PD5, PB0 and PB1, which are limited to 3.6 V
-*/
 #include "Dio.h"
 #include "Port_Private.h"
 

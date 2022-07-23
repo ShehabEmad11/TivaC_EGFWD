@@ -5,7 +5,7 @@
 /* Application Interrupt and Reset Control (APINT)*/
 #define CORE_PERIPHERALS_BASE          (0xE000E000ul)
 #define OFFSET_APPINT_FROM_COREBASE    (0xD0Cul     )
-#define APINT_VECTKEY                  (0xFA050000ul)
+#define APINT_VECTKEY                  (0x05FA0000ul)
 #define APINT                          ( (volatile Apint_t*) (CORE_PERIPHERALS_BASE + OFFSET_APPINT_FROM_COREBASE) )
 
 /*Field access has no effect for write with this register*/

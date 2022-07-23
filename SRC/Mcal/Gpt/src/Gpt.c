@@ -1,111 +1,3 @@
-/*Target:
-
-1-Init Function to configure timer and only enable counter for predefined timers (N.A now)
- but not Enable counter for rest of GPTs
- void Gpt_Init( const Gpt_ConfigType* ConfigPtr )
-
-2-Predefined Timer enabled by user 
-if enabled return:
-100us 32
-1us 16
-1us 24
-1us 32
-
-3-Max array 12 timer 
-channel ID
-TickFreq
-TickValMax
-ChannelMode
-CallBackFunc
-
-
-
-
-2-Gpt_StartTimer()
-void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
-Callback Gpt_Notification_<channel>
-
-
-3-Gpt_StopTimer
-4-During Running we could enable/Disable notification
-5-Expired != Stopped
-
-
-
-The GPTM is placed into individual/split mode by writing a value
-of 0x4 to the GPTM Configuration (GPTMCFG) register
-
-The selection of one-shot or periodic mode is determined by the value written to the TnMR field of
-the GPTM Timer n Mode (GPTMTnMR) register
-
-The timer is configured to count
-up or down using the TnCDIR bit in the GPTMTnMR register.
-
-
-The selection of one-shot or periodic mode is determined by the value written to the TnMR field of
-the GPTM Timer n Mode (GPTMTnMR) register (see page 729). The timer is configured to count
-up or down using the TnCDIR bit in the GPTMTnMR register.
-When software sets the TnEN bit in the GPTM Control (GPTMCTL) register (see page 737), the
-timer begins counting up from 0x0 or down from its preloaded value. Alternatively, if the TnWOT bit
-is set in the GPTMTnMR register, once the TnEN bit is set, the timer waits for a trigger to begin
-counting
-
-
-In addition to reloading the count value, the GPTM can generate interrupts, CCP outputs and triggers
-when it reaches the time-out event. The GPTM sets the TnTORIS bit in the GPTM Raw Interrupt
-Status (GPTMRIS) register (see page 748), and holds it until it is cleared by writing the GPTM
-Interrupt Clear (GPTMICR) register (see page 754).
-
-
-If software updates the GPTMTnILR or the GPTMTnPR register while the counter is counting down,
-the counter loads the new value on the next clock cycle and continues counting from the new value
-if the TnILD bit in the GPTMTnMR register is clear. If the TnILD bit is set, the counter loads the
-new value after the next timeout. If software updates the GPTMTnILR or the GPTMTnPR register
-while the counter is counting up, the timeout event is changed on the next cycle to the new value.
-If software updates the GPTM Timer n Value (GPTMTnV) register while the counter is counting up
-or down, the counter loads the new value on the next clock cycle and continues counting from the
-new value. If software updates the GPTMTnMATCHR or the GPTMTnPMR registers, the new values
-are reflected on the next clock cycle if the TnMRSU bit in the GPTMTnMR register is clear. If the
-TnMRSU bit is set, the new value will not take effect until the next timeout.
-
-
-If the TnSTALL bit in the GPTMCTL register is set and the RTCEN bit is not set in the GPTMCTL
-register, the timer freezes counting while the processor is halted by the debugger. The timer resumes
-counting when the processor resumes execution. If the RTCEN bit is set, it prevents the TnSTALL
-bit from freezing the count when the processor is halted by the debugger.
-
-The prescaler can
-only be used when a 16/32-bit timer is configured in 16-bit mode and when a 32/64-bit timer is
-configured in 32-bit mode.
-
-
-
-
-One-Shot/Periodic Timer Mode
-The GPTM is configured for One-Shot and Periodic modes by the following sequence:
-1. Ensure the timer is disabled (the TnEN bit in the GPTMCTL register is cleared) before making
-any changes.
-2. Write the GPTM Configuration Register (GPTMCFG) with a value of 0x0000.0000.
-3. Configure the TnMR field in the GPTM Timer n Mode Register (GPTMTnMR):
-a. Write a value of 0x1 for One-Shot mode.
-b. Write a value of 0x2 for Periodic mode.
-4. Optionally configure the TnSNAPS, TnWOT, TnMTE, and TnCDIR bits in the GPTMTnMR register
-to select whether to capture the value of the free-running timer at time-out, use an external
-trigger to start counting, configure an additional trigger or interrupt, and count up or down.
-5. Load the start value into the GPTM Timer n Interval Load Register (GPTMTnILR).
-6. If interrupts are required, set the appropriate bits in the GPTM Interrupt Mask Register
-(GPTMIMR).
-7. Set the TnEN bit in the GPTMCTL register to enable the timer and start counting.
-8. Poll the GPTMRIS register or wait for the interrupt to be generated (if enabled). In both cases,
-the status flags are cleared by writing a 1 to the appropriate bit of the GPTM Interrupt Clear
-Register (GPTMICR).
-If the TnMIE bit in the GPTMTnMR register is set, the RTCRIS bit in the GPTMRIS register is set,
-and the timer continues counting. In One-Shot mode, the timer stops counting after the time-out
-event. To re-enable the timer, repeat the sequence. A timer configured in Periodic mode reloads
-the timer and continues counting after the time-out event.
-*/
-
-
 /**********************************************************************************************************************
  *  FILE DESCRIPTION
  *  -----------------------------------------------------------------------------------------------------------------*/
@@ -459,16 +351,11 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
         #error Wrong Access Configuration
     #endif
 
-    channelPtrRegBase->GPTMTAMR.fieldAccess.TAILD=1;
-
     /*ENABLE TimerA Timeout iNTERRUPT from mask register */
-//    channelPtrRegBase->GPTMIMR.fieldAccess.TATOIM=1;
-
-    channelPtrRegBase->GPTMIMR.regAccess=1;
+    channelPtrRegBase->GPTMIMR.fieldAccess.TATOIM=1;
 
     /*Enable Timer*/
-//    channelPtrRegBase->GPTMCTL.fieldAccess.TAEN=1;
-    channelPtrRegBase->GPTMCTL.regAccess=0x1;
+    channelPtrRegBase->GPTMCTL.fieldAccess.TAEN=1;
 
     /*Flag Channel State as running*/
     ChannelsArrInfo[Channel].channelState = STATE_RUNNING;

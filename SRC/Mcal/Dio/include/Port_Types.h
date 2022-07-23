@@ -3,15 +3,6 @@
 
 #include "Std_Types.h"
 
-/*
-Port_PinType
-Port_PinDirectionType
-Port_PinModeType
-Port_PinInternalAttachType
-Port_PinOutputCurrentType
-Port_ConfigType
-*/
-
 typedef Std_ValuesType PortPinLevelValueType;
 
 typedef enum

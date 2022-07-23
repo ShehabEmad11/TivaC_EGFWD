@@ -1,6 +1,10 @@
 #ifndef INTRCTRL_CFG_H
 #define INTRCTRL_CFG_H
 
+#include "Std_Types.h"
+#include "IntrCtrl_Types.h"
+
+
 #define GROUP_PRIORITY_NUMBER_BITS          (2u)
 #define SUBGROUP_PRIORITY_NUMBER_BITS       (1u)
 
@@ -33,8 +37,18 @@
     #error Wrong PRIORITY CONFIGURATIONS
 #endif
 
+ 
 
+#define NUMBER_EXCEPTIONS_CONFIGURED 2   
 
+#define EXCEPTIONS_CONFIGURATIONS \
+{\
+/*.isConfigurable        */     TRUE,\    
+/*.isEnabled             */     TRUE,\
+/*.groupPriority         */     1,\
+/*.subGroupPriority      */     1,\  
+/*.exceptionID           */     INTERRUPT_32_64_Timer_0A\
+}
 
 
 #endif
