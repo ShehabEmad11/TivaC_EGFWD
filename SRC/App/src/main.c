@@ -29,7 +29,7 @@ void App_WTIM0_CallBack(void)
     static uint32 timePassed=0;
     static uint8 currentPeriod=ON_STATE;
 
-    timePassed+=WTIMER0_TICK;
+    timePassed+=1/*WTIMER0_TICK*/;
 
     switch (currentPeriod)
     {
@@ -72,10 +72,54 @@ volatile uint32 tempRegVal,tempRegVal2;
 extern const Port_ConfigType Ports_astrConfig[];
 extern const Gpt_ConfigType GptConfig;
 
+uint32 SysTickTimerCounter=0;
+void SysTick_Handler(void)
+{
+    App_WTIM0_CallBack();
+    SysTickTimerCounter++;
+}
+
+#define SysTick         ((volatile SysTick_Reg_t*)(0xE000E010ul))
+
+
+typedef struct
+{
+    uint32 ENABLE:1;
+    uint32 INTEN:1;
+    uint32 CLK_SRC:1;
+    uint32 :13;
+    uint32 COUNT:1;
+    uint32 :15;
+}SysTick_STCTRL_bitFieldAccess_t;
+
+typedef union
+{
+    uint32 regAccess;
+    SysTick_STCTRL_bitFieldAccess_t bitFieldAccess;
+}SysTick_STCTRL_t;
+
+typedef struct
+{
+    SysTick_STCTRL_t STCTRL;
+    uint32 STRELOAD;
+    uint32 STCURRENT;
+}SysTick_Reg_t;
 
 
 int main(void)
 {
+    #if 1
+    /*1. Program the value in the STRELOAD register.
+      2. Clear the STCURRENT register by writing to it with any value.
+      3. Configure the STCTRL register for the required operation.*/
+    SysTick->STRELOAD=4000000;
+    SysTick->STCURRENT=10;
+    /*CLK_SRC_Percision Internal Oscilator / 4*/
+    SysTick->STCTRL.bitFieldAccess.CLK_SRC=0;
+    SysTick->STCTRL.bitFieldAccess.INTEN=1;
+    SysTick->STCTRL.bitFieldAccess.ENABLE=1;
+#endif
+
 #ifdef DEBUG
     GPTMRegs_t *channelPtrRegBase=NULL_PTR;
 #endif
