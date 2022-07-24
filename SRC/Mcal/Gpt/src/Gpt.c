@@ -351,6 +351,9 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
         #error Wrong Access Configuration
     #endif
 
+    /*Enable Channel Notification*/
+    ChannelsArrInfo[Channel].channelNotificationStatus=STD_ON;
+
     /*ENABLE TimerA Timeout iNTERRUPT from mask register */
     channelPtrRegBase->GPTMIMR.fieldAccess.TATOIM=1;
 
@@ -462,11 +465,13 @@ extern void Gpt_StopTimer( Gpt_ChannelType Channel )
 
 extern void Gpt_EnableNotification( Gpt_ChannelType Channel )
 {
-
+    /*Enable Channel Notification*/
+    ChannelsArrInfo[Channel].channelNotificationStatus=STD_ON;
 }
 extern void Gpt_DisableNotification( Gpt_ChannelType Channel )
 {
-
+    /*Disable Channel Notification*/
+    ChannelsArrInfo[Channel].channelNotificationStatus=STD_OFF;
 }
 
 extern Std_ReturnType Gpt_GetPredefTimerValue( Gpt_PredefTimerType PredefTimer, uint32* TimeValuePtr )
@@ -482,7 +487,10 @@ extern void Gpt_Notification_TIMER0A(void)
     if(ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != NULL_PTR 
     && ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != 0) 
     {
-        ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk();
+        if(ChannelsArrInfo[TIMER_16_32_TIMER0].channelNotificationStatus==STD_ON)
+        {
+            ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk();
+        }
     }
 
     if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER0].channelMode==GPT_CH_MODE_ONESHOT)
@@ -498,7 +506,10 @@ extern void Gpt_Notification_TIMER0B(void)
     if(ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != NULL_PTR 
     && ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk != 0) 
     {
-        ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk();
+        if(ChannelsArrInfo[TIMER_16_32_TIMER0].channelNotificationStatus==STD_ON)
+        {
+            ChannelsArrInfo[TIMER_16_32_TIMER0].channelCbk();
+        }
     }
     
     if(P2GptConfig->p2ChannelsCfg[TIMER_16_32_TIMER0].channelMode==GPT_CH_MODE_ONESHOT)
@@ -507,6 +518,7 @@ extern void Gpt_Notification_TIMER0B(void)
         ChannelsArrInfo[TIMER_16_32_TIMER0].channelState = STATE_EXPIRED;
     }
 }
+#if 0
 extern void Gpt_Notification_TIMER1A(void)
 {
 
@@ -648,7 +660,7 @@ extern void Gpt_Notification_TIMER5B(void)
         ChannelsArrInfo[TIMER_16_32_TIMER5].channelState = STATE_EXPIRED;
     }
 }
-
+#endif
 
 
 
@@ -658,7 +670,10 @@ extern void Gpt_Notification_WTIMER0A(void)
     if(ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk != NULL_PTR 
     && ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk != 0) 
     {
-        ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk();
+        if(ChannelsArrInfo[TIMER_32_64_TIMER0].channelNotificationStatus==STD_ON)
+        {
+            ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk();
+        }
     }
     if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER0].channelMode==GPT_CH_MODE_ONESHOT)
     {
@@ -673,7 +688,10 @@ extern void Gpt_Notification_WTIMER0B(void)
     if(ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk != NULL_PTR 
     && ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk != 0) 
     {
-        ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk();
+        if(ChannelsArrInfo[TIMER_32_64_TIMER0].channelNotificationStatus==STD_ON)
+        {
+            ChannelsArrInfo[TIMER_32_64_TIMER0].channelCbk();
+        }
     }
     if(P2GptConfig->p2ChannelsCfg[TIMER_32_64_TIMER0].channelMode==GPT_CH_MODE_ONESHOT)
     {
@@ -681,6 +699,8 @@ extern void Gpt_Notification_WTIMER0B(void)
         ChannelsArrInfo[TIMER_32_64_TIMER0].channelState = STATE_EXPIRED;
     }
 }
+
+#if 0
 extern void Gpt_Notification_WTIMER1A(void)
 {
 
@@ -822,6 +842,7 @@ extern void Gpt_Notification_WTIMER5B(void)
         ChannelsArrInfo[TIMER_32_64_TIMER5].channelState = STATE_EXPIRED;
     }
 }
+#endif
 /*============================END of timer CB Notifications==================================*/
 
 /*============================START ISR Definations=========================================*/

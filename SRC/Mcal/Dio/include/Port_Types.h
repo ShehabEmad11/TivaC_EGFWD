@@ -5,61 +5,72 @@
 
 typedef Std_ValuesType PortPinLevelValueType;
 
+typedef enum 
+{
+    PORTA,
+    PORTB,
+    PORTC,
+    PORTD,
+    PORTE,
+    PORTF
+}Internal_Port_Type;
+
+
 typedef enum
 {
-    PORT_A0 = 0,
-    PORT_A1,
-    PORT_A2,
-    PORT_A3,
-    PORT_A4,
-    PORT_A5,
-    PORT_A6,
-    PORT_A7 = 7,
+    PA0 = 0,
+    PA1,
+    PA2,
+    PA3,
+    PA4,
+    PA5,
+    PA6,
+    PA7 = 7,
 
-    PORT_B0 = 8,
-    PORT_B1,
-    PORT_B2,
-    PORT_B3,
-    PORT_B4,
-    PORT_B5,
-    PORT_B6,
-    PORT_B7 = 15,
+    PB0 = 8,
+    PB1,
+    PB2,
+    PB3,
+    PB4,
+    PB5,
+    PB6,
+    PB7 = 15,
 
-    PORT_C0 = 16,
-    PORT_C1,
-    PORT_C2,
-    PORT_C3,
-    PORT_C4,
-    PORT_C5,
-    PORT_C6,
-    PORT_C7 = 23,
+    PC0 = 16,
+    PC1,
+    PC2,
+    PC3,
+    PC4,
+    PC5,
+    PC6,
+    PC7 = 23,
 
-    PORT_D0 = 24,
-    PORT_D1,
-    PORT_D2,
-    PORT_D3,
-    PORT_D4,
-    PORT_D5,
-    PORT_D6,
-    PORT_D7 = 31,
+    PD0 = 24,
+    PD1,
+    PD2,
+    PD3,
+    PD4,
+    PD5,
+    PD6,
+    PD7 = 31,
 
-    PORT_E0 = 32,
-    PORT_E1,
-    PORT_E2,
-    PORT_E3,
-    PORT_E4,
-    PORT_E5 = 37, 
- /* PORT_E6
-    PORT_E7 */
+    PE0 = 32,
+    PE1,
+    PE2,
+    PE3,
+    PE4,
+    PE5 = 37, 
+ /* PE6
+    PE7 */
 
-    PORT_F0 = 40,
-    PORT_F1,
-    PORT_F2,
-    PORT_F3,
-    PORT_F4 = 44
- /* PORT_F5,
-    PORT_F6,
-    PORT_F7 */
+    PF0 = 40,
+    PF1,
+    PF2,
+    PF3,
+    PF4 = 44
+ /* PF5,
+    PF6,
+    PF7 */
 }Port_PinType;
 
 
@@ -106,6 +117,7 @@ typedef enum
     CURRENT_8mA
 }Port_PinOutputCurrentType;
 
+#if 0
 typedef struct 
 {
     Port_PinModeType             mode;           /*{Uart , GPIO, ....}*/
@@ -114,14 +126,39 @@ typedef struct
     Port_PinInternalAttachType   connection;     /*PullUp/Down/OpenDrain*/
     Port_PinOutputCurrentType    driveStrength;     /*2mA, 4mA, 8mA*/
 }Pin_ConfigType;
+#endif
 
+typedef void (*PortPin_FunctionCbkType)(void);
+
+typedef enum
+{
+    HIGH_LEVEL_TRIGGER,
+    LOW_LEVEL_TRIGGER,
+
+    RISING_EDGE_TRIGGER,
+    FALLING_EDGE_TRIGGER,
+    BOTH_EDGE_TRIGGER,
+    DEFAULT_TRIGGER
+}Port_PinTriggerModeType;
 
 typedef struct
 {
-    uint8 numberPins;
-    Pin_ConfigType astrPins[8];            /*Array of 8 pins */
+    Port_PinType                 pinID;          /*PIN_A0, PIN_B1,.....*/
+    Port_PinModeType             mode;           /*{Uart , GPIO, ....}*/
+    Port_PinDirectionType        direction;      /*If GPIO : input/output*/
+    PortPinLevelValueType        level;          /*if output ---> HIGH,LOW*/
+    Port_PinInternalAttachType   connection;     /*PullUp/Down/OpenDrain*/
+    Port_PinOutputCurrentType    driveStrength;     /*2mA, 4mA, 8mA*/
+    uint8                        isInterruptEnabled;  
+    PortPin_FunctionCbkType      callBackFunc;
+    Port_PinTriggerModeType      triggerMode;     /*HIGH/LOW Level triggered or RISING/FALLING/BOTH Edges Triggered*/
+
 }Port_ConfigType;
 
 
+typedef struct 
+{
+    PortPin_FunctionCbkType      callBackFunc;
+}PortInternal_PinInfo;
 
 #endif /* PORT_TYPES_H */

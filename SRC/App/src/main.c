@@ -6,8 +6,8 @@
 #include "Gpt.h"
 
 
-#define ON_TIME      2
-#define OFF_TIME     1
+static uint8 ON_TIME=1;
+static uint8 OFF_TIME=1;
 
 void App_WTIM0_CallBack(void)
 {
@@ -55,20 +55,30 @@ void App_WTIM0_CallBack(void)
 }
 
 
+void App_PORTF_SW0_CallBack(void)
+{
+
+}
+volatile uint32 Here=0;
+void App_PORTF_SW1_CallBack(void)
+{
+
+    Here++;
+}
+
 extern const Port_ConfigType Ports_astrConfig[];
 extern const Gpt_ConfigType GptConfig;
 extern const ExceptionConfigstr_t Exceptions_astrConfig[];
 
 int main(void)
 {
-    uint32 tempVal=0;
-
-    uint32 i;
     /*Enable System Clock*/
     Rcc_InitSysClock();
     /*Enable GPIOA Clock*/
     Rcc_voidEnablePeripheral(PERIPH_GPIO_RUN_PA);
-
+    
+    /*Enable GPIOF Clock*/
+    Rcc_voidEnablePeripheral(PERIPH_GPIO_RUN_PF);
     /*Enable TIMER_32_64_TIMER0 's Clock*/
     Rcc_voidEnablePeripheral(PERIPH_TIMER_32_64_RUN_TIMER0);
 
@@ -79,6 +89,8 @@ int main(void)
     Port_Init(&Ports_astrConfig[0]);
     
     Gpt_Init(&GptConfig);
+
+    Gpt_EnableNotification(TIMER_32_64_TIMER0);
 
     Gpt_StartTimer(TIMER_32_64_TIMER0,16000000ul);
  

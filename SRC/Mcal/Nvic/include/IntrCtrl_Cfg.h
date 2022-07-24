@@ -48,6 +48,13 @@
 /*.groupPriority         */     1,\
 /*.subGroupPriority      */     1,\  
 /*.exceptionID           */     INTERRUPT_32_64_Timer_0A\
+},\
+{\
+/*.isConfigurable        */     TRUE,\    
+/*.isEnabled             */     TRUE,\
+/*.groupPriority         */     1,\
+/*.subGroupPriority      */     0,\  
+/*.exceptionID           */     INTERRUPT_GPIO_Port_F\
 }
 
 

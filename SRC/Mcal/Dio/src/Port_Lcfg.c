@@ -2,12 +2,7 @@
 #include "Port_Types.h"
 #include "Port_Cfg.h"
 
-const Port_ConfigType Ports_astrConfig[NUMBER_GPIO_PORTS] =
+const Port_ConfigType Ports_astrConfig[NUMBER_PINS_CONFIGURED] =
 {
-    {PORTA_CONFIGURATIONS},
-    {PORTB_CONFIGURATIONS},
-    {PORTC_CONFIGURATIONS},
-    {PORTD_CONFIGURATIONS},
-    {PORTE_CONFIGURATIONS},
-    {PORTF_CONFIGURATIONS}
-	};
+    GPIO_PINS_CONFIGURATIONS
+};

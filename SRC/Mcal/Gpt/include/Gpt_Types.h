@@ -65,6 +65,7 @@ typedef struct
 {
     GptInternal_StateType   channelState;
     Ptr2VoidFunction_t      channelCbk;
+    uint8                   channelNotificationStatus;
 }GptInternal_ChannelInfo;
 
 

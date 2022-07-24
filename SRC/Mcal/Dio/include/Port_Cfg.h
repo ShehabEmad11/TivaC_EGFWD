@@ -4,8 +4,64 @@
 #include "Port_Types.h"
 
 #define NUMBER_GPIO_PORTS   (6u)
+#define NUMBER_GPIO_PINS    (48u)               /*Only 43 but we use 48 for code access*/
+
+#define NUMBER_PINS_CONFIGURED  (3u)
+
+void App_PORTF_SW0_CallBack(void);
+void App_PORTF_SW1_CallBack(void);
 
 
+#define GPIO_PINS_CONFIGURATIONS \
+{\
+/*.pinID        */                PA0,\
+/*.mode         */                GPIO,\
+/*.direction    */                OUTPUT,\
+/*.level        */                STD_HIGH,\
+/*.connection   */                CONNECTION_DEFAULT,\
+/*.driveStrength*/                CURRENT_4mA,\
+/*.IsInterruptEnabled*/           STD_OFF,\
+/*.callBack     */                NULL_PTR,\
+/*.Port_PinTriggerModeType*/      DEFAULT_TRIGGER\
+},\
+{\
+/*.pinID        */                PF0,\
+/*.mode         */                GPIO,\
+/*.direction    */                INPUT,\
+/*.level        */                STD_HIGH,\
+/*.connection   */                CONNECTION_DEFAULT,\
+/*.driveStrength*/                CURRENT_4mA,\
+/*.IsInterruptEnabled*/           STD_ON,\
+/*.callBackFunc */                App_PORTF_SW0_CallBack,\
+/*.Port_PinTriggerModeType*/      LOW_LEVEL_TRIGGER\
+},\
+{\
+/*.pinID        */                 PF4,\
+/*.mode         */                 GPIO,\
+/*.direction    */                 INPUT,\
+/*.level        */                 STD_HIGH,\
+/*.connection   */                 CONNECTION_DEFAULT,\
+/*.driveStrength*/                 CURRENT_4mA,\
+/*.IsInterruptEnabled*/            STD_ON,\
+/*.callBackFunc */                 App_PORTF_SW1_CallBack,\
+/*.Port_PinTriggerModeType*/       LOW_LEVEL_TRIGGER\
+}                 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
 /*TODO: define complete config*/
                                 /*PinMode     Direction        Level         Connection          DriveStrength*/
 #define PORTA_PINS_CONFIG       {\
@@ -68,11 +124,11 @@
 
                                 /*PinMode     Direction        Level         Connection          DriveStrength*/
 #define PORTF_PINS_CONFIG       {\
-/*PINF0*//*Locked*/               {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
-/*PINF1*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
-/*PINF2*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
+/*PINF0*//*Locked*/               {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_DEFAULT}, \
+/*PINF1*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
+/*PINF2*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,CONNECTION_DEFAULT   ,CURRENT_4mA}, \
 /*PINF3*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
-/*PINF4*/                         {GPIO        ,OUTPUT       ,STD_HIGH     ,OPEN_DRAIN   ,CURRENT_DEFAULT}, \
+/*PINF4*/                         {GPIO        ,INPUT        ,STD_HIGH     ,PULL_UP                ,CURRENT_DEFAULT}, \
 /*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, */\
 /*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, */\
 /*N/A                             {PORT_NA     ,PORT_NA      ,PORT_NA      ,PORT_NA              ,PORT_NA    }, */\
@@ -88,4 +144,5 @@
 #define PORTE_CONFIGURATIONS                6           ,       PORTE_PINS_CONFIG
 #define PORTF_CONFIGURATIONS                5           ,       PORTF_PINS_CONFIG
 
+#endif
 #endif /* PORT_CFG_H */
