@@ -135,11 +135,9 @@ extern void Gpt_Init(const Gpt_ConfigType* ConfigPtr)
 
             /*Set Timer Mode of Operation (Individual vs Concatenated)*/
             #if CHANNEL_ACCESS_MODE == INDIVIDUAL_ACCESS
-            channelPtrRegBase->GPTMCFG=0x4;
+                channelPtrRegBase->GPTMCFG=0x4;
             #elif CHANNEL_ACCESS_MODE == CONCATENATED_ACCESS
                 channelPtrRegBase->GPTMCFG=0x00;
-                /*Todo Complete Implementation*/
-                #error Not Implemented Yet
             #else
                 #error Wrong Register Access Mode Configurations
             #endif
@@ -179,7 +177,23 @@ extern void Gpt_Init(const Gpt_ConfigType* ConfigPtr)
             #endif
 
             /*Adjust Prescaler*/
-            channelPtrRegBase->GPTMTAPR = channelPrescaler;
+            #if CHANNEL_ACCESS_MODE == INDIVIDUAL_ACCESS
+                if(channelCountDirection==COUNT_DOWN_DIRECTION)
+                {
+                    channelPtrRegBase->GPTMTAPR = channelPrescaler;   
+                }
+                else if(channelCountDirection==COUNT_UP_DIRECTION)
+                {
+                    /*Todo Handle Prescaler in upCounting Direction*/   
+                }
+                else
+                {
+                    /*Error*/
+                }
+            #else
+                #warning "PreScaler has no effect in CONCATENATED MODE"
+            #endif
+            
 
             /*Disable All GPT Interrupts*/
             channelPtrRegBase->GPTMIMR.regAccess=0x00;
@@ -322,34 +336,29 @@ extern void Gpt_StartTimer( Gpt_ChannelType Channel, Gpt_ValueType Value )
     channelPtrRegBase->GPTMICR.fieldAccess.TATOCINT=1;
     #if CHANNEL_ACCESS_MODE == INDIVIDUAL_ACCESS  
     {
-        /*Set Number of Ticks*/
-        //channelPtrRegBase->GPTMTAILR=Value & mask;
-
-        if(P2GptConfig->p2ChannelsCfg[channelConfigIdx].channelCountDirection==COUNT_UP_DIRECTION)
+        /*Reset Counting Register*/
+        channelPtrRegBase->GPTMTAILR = (Value & P2GptConfig->p2ChannelsCfg[configIter].channelTickValMax );
+    }
+    #elif CHANNEL_ACCESS_MODE == CONCATENATED_ACCESS
+    {
+         /*Todo:Handle Concatenated Access*/
+        if(Channel>=TIMER_16_32_TIMER0 && Channel<TIMER_32_64_TIMER0)
         {
-            /*Todo: Write Prescaler*/
-            
-            /*Reset Counting Register*/
-            //channelPtrRegBase->GPTMTAV=0x00000000 & mask;
-            channelPtrRegBase->GPTMTAILR=Value;
+            channelPtrRegBase->GPTMTAILR = (Value & P2GptConfig->p2ChannelsCfg[configIter].channelTickValMax );
+        }
+        else if(Channel>=TIMER_32_64_TIMER0 && Channel<=TIMER_32_64_TIMER5)
+        {
+            /*TODO HANDLE Load register with 64 bit values divided in CHANNELA & CHANNELB*/
         }
         else
         {
-            /*Todo: Write Prescaler*/
-            
-            /*Reset Counting Register*/
-            //channelPtrRegBase->GPTMTAV=Value & mask;
-            channelPtrRegBase->GPTMTAILR=Value;
+            /*Error*/
         }
     }
-    #elif   CHANNEL_ACCESS_MODE == CONCATENATED_ACCESS
-    {
-         /*Todo:Handle Concatenated Access*/
-        #warning Not Yet Implemented
-    }   
     #else
-        #error Wrong Access Configuration
-    #endif
+        #error Wrong Register Access Mode Configurations
+    #endif  
+
 
     /*Enable Channel Notification*/
     ChannelsArrInfo[Channel].channelNotificationStatus=STD_ON;

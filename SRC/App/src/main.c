@@ -142,7 +142,7 @@ int main(void)
     /*Enable GPIOF Clock*/
     Rcc_voidEnablePeripheral(PERIPH_GPIO_RUN_PF);
     /*Enable TIMER_32_64_TIMER0 's Clock*/
-    Rcc_voidEnablePeripheral(PERIPH_TIMER_32_64_RUN_TIMER0);
+    //Rcc_voidEnablePeripheral(PERIPH_TIMER_32_64_RUN_TIMER0);
     /*Enable TIMER_16_32_TIMER0 's Clock*/
     Rcc_voidEnablePeripheral(PERIPH_TIMER_16_32_RUN_TIMER0);
     /*Set AHB the bus for all GPIOs*/
@@ -153,14 +153,14 @@ int main(void)
       
     Gpt_Init(&GptConfig);
 
-    Gpt_EnableNotification(TIMER_32_64_TIMER0);
+    //Gpt_EnableNotification(TIMER_32_64_TIMER0);
 
-    Gpt_StartTimer(TIMER_32_64_TIMER0,16000000ul);
+    //Gpt_StartTimer(TIMER_32_64_TIMER0,16000000ul);
 
     
     Gpt_EnableNotification(TIMER_16_32_TIMER0);
 
-    Gpt_StartTimer(TIMER_16_32_TIMER0,4000ul);
+    Gpt_StartTimer(TIMER_16_32_TIMER0,16000000ul);
     
     while(1)
     {

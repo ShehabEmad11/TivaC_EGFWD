@@ -39,16 +39,9 @@
 
  
 
-#define NUMBER_EXCEPTIONS_CONFIGURED 3   
+#define NUMBER_EXCEPTIONS_CONFIGURED   2
 
 #define EXCEPTIONS_CONFIGURATIONS \
-{\
-/*.isConfigurable        */     TRUE,\    
-/*.isEnabled             */     TRUE,\
-/*.groupPriority         */     1,\
-/*.subGroupPriority      */     1,\  
-/*.exceptionID           */     INTERRUPT_32_64_Timer_0A\
-},\
 {\
 /*.isConfigurable        */     TRUE,\    
 /*.isEnabled             */     TRUE,\
