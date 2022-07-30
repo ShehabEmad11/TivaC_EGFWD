@@ -7,59 +7,14 @@
 
 void App_PORTF_SW0_CallBack(void);
 void App_PORTF_SW1_CallBack(void);
-void App_WTIM0_CallBack(void);
 void App_TIM0_CallBack(void);
-
 
 static uint8 ON_TIME=1;
 static uint8 OFF_TIME=1;
 
-void App_WTIM0_CallBack(void)
-{
-    #if 0
-    #define ON_STATE    (1u)
-    #define OFF_STATE   (0u)
-
-
-    static uint32 timePassed=0;
-    static uint8 currentPeriod=ON_STATE;
-
-    timePassed+=1;
-
-    switch (currentPeriod)
-    {
-        case ON_STATE:
-            if(timePassed>=ON_TIME)
-            {
-                Dio_WriteChannel(PIN_A0,STD_LOW);
-                timePassed=0;
-                currentPeriod=OFF_STATE;
-            }
-            else
-            {
-                Dio_WriteChannel(PIN_A0,STD_HIGH);
-                /*do Nothing wait for time to pass*/
-            }
-            break;
-        
-        case OFF_STATE:
-            if(timePassed>=OFF_TIME)
-            {
-                Dio_WriteChannel(PIN_A0,STD_HIGH);
-                timePassed=0;
-                currentPeriod=ON_STATE;
-            }
-            else
-            {
-                Dio_WriteChannel(PIN_A0,STD_LOW);
-                /*do Nothing wait for time to pass*/
-            }
-            break;
-        default:
-        break;
-    }
-    #endif
-}
+extern const Port_ConfigType Ports_astrConfig[];
+extern const Gpt_ConfigType GptConfig;
+extern const ExceptionConfigstr_t Exceptions_astrConfig[];
 
 void App_TIM0_CallBack(void)
 {
@@ -128,10 +83,6 @@ void App_PORTF_SW1_CallBack(void)
     }
 }
 
-extern const Port_ConfigType Ports_astrConfig[];
-extern const Gpt_ConfigType GptConfig;
-extern const ExceptionConfigstr_t Exceptions_astrConfig[];
-
 int main(void)
 {
     /*Enable System Clock*/
@@ -141,10 +92,10 @@ int main(void)
     
     /*Enable GPIOF Clock*/
     Rcc_voidEnablePeripheral(PERIPH_GPIO_RUN_PF);
-    /*Enable TIMER_32_64_TIMER0 's Clock*/
-    //Rcc_voidEnablePeripheral(PERIPH_TIMER_32_64_RUN_TIMER0);
+
     /*Enable TIMER_16_32_TIMER0 's Clock*/
     Rcc_voidEnablePeripheral(PERIPH_TIMER_16_32_RUN_TIMER0);
+
     /*Set AHB the bus for all GPIOs*/
     Rcc_GpioAllUseAHB();
     IntrCtrl_voidInit();
@@ -153,11 +104,6 @@ int main(void)
       
     Gpt_Init(&GptConfig);
 
-    //Gpt_EnableNotification(TIMER_32_64_TIMER0);
-
-    //Gpt_StartTimer(TIMER_32_64_TIMER0,16000000ul);
-
-    
     Gpt_EnableNotification(TIMER_16_32_TIMER0);
 
     Gpt_StartTimer(TIMER_16_32_TIMER0,16000000ul);
@@ -169,3 +115,72 @@ int main(void)
 
     return 1;
 }	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void App_WTIM0_CallBack(void);
+
+void App_WTIM0_CallBack(void)
+{
+    #if 0
+    #define ON_STATE    (1u)
+    #define OFF_STATE   (0u)
+
+
+    static uint32 timePassed=0;
+    static uint8 currentPeriod=ON_STATE;
+
+    timePassed+=1;
+
+    switch (currentPeriod)
+    {
+        case ON_STATE:
+            if(timePassed>=ON_TIME)
+            {
+                Dio_WriteChannel(PIN_A0,STD_LOW);
+                timePassed=0;
+                currentPeriod=OFF_STATE;
+            }
+            else
+            {
+                Dio_WriteChannel(PIN_A0,STD_HIGH);
+                /*do Nothing wait for time to pass*/
+            }
+            break;
+        
+        case OFF_STATE:
+            if(timePassed>=OFF_TIME)
+            {
+                Dio_WriteChannel(PIN_A0,STD_HIGH);
+                timePassed=0;
+                currentPeriod=ON_STATE;
+            }
+            else
+            {
+                Dio_WriteChannel(PIN_A0,STD_LOW);
+                /*do Nothing wait for time to pass*/
+            }
+            break;
+        default:
+        break;
+    }
+    #endif
+}
