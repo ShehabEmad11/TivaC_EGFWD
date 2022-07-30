@@ -19,13 +19,21 @@ extern void Port_Init(const Port_ConfigType* ConfigPtr)
         pinNumber=ConfigPtr[configIter].pinID;
         currentPort =  pinNumber/8;
         currentPin  =  pinNumber%8;
+
+        if(currentPort==PORTF && currentPin==0)
+        {
+                /*Unlock Commit Register*/
+                GPIO_P2str[currentPort].GPIOLOCK=0x4C4F434B;
+                GPIO_P2str[currentPort].GPIOCR =0x01;
+
+        }
         
         if(ConfigPtr[configIter].mode == GPIO)
         {
             /*Clear bit in AFSEL to indicate a GPIO*/
             CLR_BIT(GPIO_P2str[currentPort].GPIOAFSEL , currentPin);
 
-            if(ConfigPtr[currentPort].direction == INPUT)
+            if(ConfigPtr[configIter].direction == INPUT)
             {
                 CLR_BIT(GPIO_P2str[currentPort].GPIODIR , currentPin);
 
@@ -78,7 +86,7 @@ extern void Port_Init(const Port_ConfigType* ConfigPtr)
                             break;
                     }
                     /*Clear The Corresponding Interrupt to avoid Trigger False interrupt because of config*/
-                    SET_BIT(GPIO_P2str[currentPort].GPIORIS,currentPin);
+                    SET_BIT(GPIO_P2str[currentPort].GPIOICR,currentPin);
 
                     if(ConfigPtr[configIter].callBackFunc != NULL_PTR)
                     {
@@ -86,13 +94,13 @@ extern void Port_Init(const Port_ConfigType* ConfigPtr)
                     }
                 }
             }
-            else if(ConfigPtr[currentPort].direction == OUTPUT)
+            else if(ConfigPtr[configIter].direction == OUTPUT)
             {
                 SET_BIT(GPIO_P2str[currentPort].GPIODIR , currentPin);
 
                 /*Set Level*/
-                if(ConfigPtr[currentPort].level == STD_HIGH 
-                || ConfigPtr[currentPort].level == STD_LOW)
+                if(ConfigPtr[configIter].level == STD_HIGH 
+                || ConfigPtr[configIter].level == STD_LOW)
                 {
                     addressOffsetVal=(uint16) ( (uint16)1 << ((uint16)currentPin + (uint16)2) ) ;
 
@@ -102,7 +110,7 @@ extern void Port_Init(const Port_ConfigType* ConfigPtr)
                 }
 
                 /*Set Drive Strength*/
-                switch(ConfigPtr[currentPort].driveStrength)
+                switch(ConfigPtr[configIter].driveStrength)
                 {
                     case CURRENT_2mA:
                     default:
@@ -134,7 +142,7 @@ extern void Port_Init(const Port_ConfigType* ConfigPtr)
             //GPIO_P2str[portIter].GPIOPCTL |= ((mapValue & 0x0000000F) << (pinIter*4));
         }
 
-        switch(ConfigPtr[currentPort].connection)
+        switch(ConfigPtr[configIter].connection)
         {
             case PULL_UP:
                 SET_BIT(GPIO_P2str[currentPort].GPIOPUR , currentPin);
@@ -152,7 +160,7 @@ extern void Port_Init(const Port_ConfigType* ConfigPtr)
 
 
         /*Enable/Disable Digital Functionality GPIO/Alternate function*/
-        if(ConfigPtr[currentPort].mode != MODE_DEFAULT)
+        if(ConfigPtr[configIter].mode != MODE_DEFAULT)
         {
             SET_BIT(GPIO_P2str[currentPort].GPIODEN , currentPin);
         }
@@ -165,6 +173,8 @@ extern void Port_Init(const Port_ConfigType* ConfigPtr)
         /*Enable/Disable Interrupt*/
         if(ConfigPtr[configIter].isInterruptEnabled==STD_ON)
         {
+            /*Clear Interrupt*/
+             SET_BIT(GPIO_P2str[currentPort].GPIOICR , currentPin);
             /*Mask Interrupt Before any further configurations*/
             SET_BIT(GPIO_P2str[currentPort].GPIOIM,currentPin);
         }

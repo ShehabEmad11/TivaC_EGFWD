@@ -29,22 +29,22 @@ void App_PORTF_SW1_CallBack(void);
 /*.mode         */                GPIO,\
 /*.direction    */                INPUT,\
 /*.level        */                STD_HIGH,\
-/*.connection   */                CONNECTION_DEFAULT,\
-/*.driveStrength*/                CURRENT_4mA,\
+/*.connection   */                PULL_UP,\
+/*.driveStrength*/                CURRENT_DEFAULT,\
 /*.IsInterruptEnabled*/           STD_ON,\
 /*.callBackFunc */                App_PORTF_SW0_CallBack,\
-/*.Port_PinTriggerModeType*/      LOW_LEVEL_TRIGGER\
+/*.Port_PinTriggerModeType*/      FALLING_EDGE_TRIGGER\
 },\
 {\
 /*.pinID        */                 PF4,\
 /*.mode         */                 GPIO,\
 /*.direction    */                 INPUT,\
 /*.level        */                 STD_HIGH,\
-/*.connection   */                 CONNECTION_DEFAULT,\
-/*.driveStrength*/                 CURRENT_4mA,\
+/*.connection   */                 PULL_UP,\
+/*.driveStrength*/                 CURRENT_DEFAULT,\
 /*.IsInterruptEnabled*/            STD_ON,\
 /*.callBackFunc */                 App_PORTF_SW1_CallBack,\
-/*.Port_PinTriggerModeType*/       LOW_LEVEL_TRIGGER\
+/*.Port_PinTriggerModeType*/       FALLING_EDGE_TRIGGER\
 }                 
 
 
